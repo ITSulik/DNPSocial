@@ -57,4 +57,14 @@ public class PostInMemoryRepo : IPostRepository
     {
         return posts.AsQueryable();
     }
+    public PostInMemoryRepo()
+    {
+        SeedData();
+    }
+
+    private void SeedData()
+    {
+        posts.Add(new Post { Id = 1, Title = "Welcome to DNPSocial", Body = "This is my Assingment to understand C#", UserId = 1, Created = DateTime.Now });
+        posts.Add(new Post { Id = 2, Title = "Hello friend", Body = "Hello friend, let's give you a name", UserId = 2, Created = DateTime.Now });
+    }
 }

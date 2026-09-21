@@ -54,4 +54,14 @@ public class CommentInMemoryRepo : ICommentRepository
         comments.Remove(comment);
         return Task.CompletedTask;
     }
+
+    public CommentInMemoryRepo()
+    {
+        SeedData();
+    }
+
+    private void SeedData()
+    {
+        throw new NotImplementedException();
+    }
 }

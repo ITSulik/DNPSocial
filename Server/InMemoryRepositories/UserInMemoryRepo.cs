@@ -68,4 +68,15 @@ public class UserInMemoryRepo : IUserRepository
    {
       return users.AsQueryable();
    }
+   public UserInMemoryRepo()
+   {
+      SeedData();
+   }
+
+   private void SeedData()
+   {
+      users.Add(new User { ID = 1, Username = "sulik", Email = "sulik@example.com", Password = "soulful", Created = DateTime.Now });
+      users.Add(new User { ID = 2, Username = "Sam", Email = "s4ms3pi0l@example.com", Password = "areallylongpasswordsupposedly", Created = DateTime.Now });
+      users.Add(new User { ID = 3, Username = "3rdguy", Email = "guy3@example.com", Password = "password123", Created = DateTime.Now });
+   }
 }
