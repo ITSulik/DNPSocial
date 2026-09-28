@@ -55,13 +55,13 @@ public class CommentInMemoryRepo : ICommentRepository
         return Task.CompletedTask;
     }
 
-    public CommentInMemoryRepo()
-    {
-        SeedData();
-    }
-
-    private void SeedData()
-    {
-        throw new NotImplementedException();
-    }
+    // public CommentInMemoryRepo()
+    // {
+    //     SeedData();
+    // }
+    //
+    // private void SeedData()
+    // {
+    //     throw new NotImplementedException();
+    // }
 }

@@ -1,12 +1,12 @@
 ﻿using CLIRun.UserInterface;
-using InMemoryRepositories;
+using FileStorage;
 using RepositoryContracts;
 
 
 Console.WriteLine("Starting Application...");
-IUserRepository userRepository = new UserInMemoryRepo();
-IPostRepository postRepository = new PostInMemoryRepo();
-ICommentRepository commentRepository = new CommentInMemoryRepo();
+IUserRepository userRepository = new UserFileStorage();
+IPostRepository postRepository = new PostFileStorage();
+ICommentRepository commentRepository = new CommentFileStorage();
 
 CliAppUi cliAppUi = new CliAppUi(userRepository, postRepository, commentRepository);
 await cliAppUi.StartAsync();
