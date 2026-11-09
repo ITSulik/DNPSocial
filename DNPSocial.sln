@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiContracts", "Shared\ApiC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "Server\WebAPI\WebAPI.csproj", "{71FFE6FD-CD90-46ED-A952-E7B1C24A2FD6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{12AF169E-6817-4EEB-909C-239FA8147DDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp", "Client\BlazorApp\BlazorApp.csproj", "{f4d93354-08f1-4bc2-b5ba-73d19fd311e2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +35,7 @@ Global
 		{463F8D22-69C1-45F3-B37D-82BE87AF0E7A} = {97D977C2-79BE-446F-B7B0-14CC3F9879A3}
 		{577229DB-18D2-4808-8BAE-024E346BCBE6} = {625BBBAE-8599-4B63-A89D-B988AECD85CE}
 		{71FFE6FD-CD90-46ED-A952-E7B1C24A2FD6} = {97D977C2-79BE-446F-B7B0-14CC3F9879A3}
+		{f4d93354-08f1-4bc2-b5ba-73d19fd311e2} = {12AF169E-6817-4EEB-909C-239FA8147DDB}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E5E0C22A-948E-4D93-BA45-132EB1974208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -61,5 +66,9 @@ Global
 		{71FFE6FD-CD90-46ED-A952-E7B1C24A2FD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71FFE6FD-CD90-46ED-A952-E7B1C24A2FD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71FFE6FD-CD90-46ED-A952-E7B1C24A2FD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{f4d93354-08f1-4bc2-b5ba-73d19fd311e2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {f4d93354-08f1-4bc2-b5ba-73d19fd311e2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {f4d93354-08f1-4bc2-b5ba-73d19fd311e2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {f4d93354-08f1-4bc2-b5ba-73d19fd311e2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

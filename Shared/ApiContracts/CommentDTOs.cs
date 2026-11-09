@@ -18,5 +18,6 @@ public class CommentDto
     public required string Body { get; set; }
     public int UserId { get; set; }
     public int PostId { get; set; }
+    public string? AuthorUsername { get; set; }
     public DateTime Created { get; set; }
 }

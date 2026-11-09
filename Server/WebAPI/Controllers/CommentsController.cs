@@ -109,8 +109,19 @@ public class CommentsController(
         }
     }
 
-    private static CommentDto ToDto(Comment comment)
+    private CommentDto ToDto(Comment comment)
     {
-        return new CommentDto { Id = comment.Id, Body = comment.Body, UserId = comment.UserId, PostId = comment.PostId, Created = comment.Created };
+        string? authorUsername = userRepository.GetUsersAsync()
+            .FirstOrDefault(u => u.ID == comment.UserId)?.Username;
+
+        return new CommentDto
+        {
+            Id = comment.Id,
+            Body = comment.Body,
+            UserId = comment.UserId,
+            PostId = comment.PostId,
+            AuthorUsername = authorUsername,
+            Created = comment.Created
+        };
     }
 }

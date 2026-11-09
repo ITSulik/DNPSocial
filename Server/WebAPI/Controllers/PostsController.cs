@@ -106,8 +106,19 @@ public class PostsController(IPostRepository postRepository, IUserRepository use
         }
     }
 
-    private static PostDto ToDto(Post post)
+    private PostDto ToDto(Post post)
     {
-        return new PostDto { Id = post.Id, Title = post.Title, Body = post.Body, UserId = post.UserId, Created = post.Created };
+        string? authorUsername = userRepository.GetUsersAsync()
+            .FirstOrDefault(u => u.ID == post.UserId)?.Username;
+
+        return new PostDto
+        {
+            Id = post.Id,
+            Title = post.Title,
+            Body = post.Body,
+            UserId = post.UserId,
+            AuthorUsername = authorUsername,
+            Created = post.Created
+        };
     }
 }

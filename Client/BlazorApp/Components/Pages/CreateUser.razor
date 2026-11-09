@@ -1,0 +1,55 @@
+@page "/users/create"
+@using ApiContracts
+@using BlazorApp.Services
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create User</PageTitle>
+
+<h1>Create User</h1>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<div class="mb-3">
+    <label class="form-label">Username</label>
+    <input class="form-control" @bind="username" />
+</div>
+<div class="mb-3">
+    <label class="form-label">Email</label>
+    <input class="form-control" @bind="email" />
+</div>
+<div class="mb-3">
+    <label class="form-label">Password</label>
+    <input type="password" class="form-control" @bind="password" />
+</div>
+<button class="btn btn-primary" @onclick="SubmitAsync">Create</button>
+
+@code {
+    private string username = "";
+    private string email = "";
+    private string password = "";
+    private string? errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        errorMessage = null;
+        try
+        {
+            CreateUserDto request = new()
+            {
+                Username = username,
+                Email = email,
+                Password = password
+            };
+            await UserService.CreateUserAsync(request);
+            NavigationManager.NavigateTo("/posts");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}
