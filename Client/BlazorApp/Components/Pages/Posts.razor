@@ -4,9 +4,9 @@
 <PageTitle>Posts</PageTitle>
 
 <h1>Posts</h1>
-
-<p><a class="btn btn-primary" href="/posts/create">Create Post</a></p>
-
+<AuthorizeView>
+    <p><a class="btn btn-primary" href="/posts/create">Create Post</a></p>
+</AuthorizeView>
 @if (errorMessage is not null)
 {
     <div class="alert alert-danger">@errorMessage</div>

@@ -1,4 +1,5 @@
 @page "/posts/create"
+@attribute [Authorize]
 @inject IPostService PostService
 @inject NavigationManager NavigationManager
 
@@ -22,8 +23,8 @@
 <button class="btn btn-primary" @onclick="SubmitAsync">Create</button>
 
 @code {
-    // Step 5.3: no login system yet, every post is authored by user 1.
-    private const int CurrentUserId = 1;
+    [CascadingParameter]
+    public Task<AuthenticationState> State { get; set; } = null!;
 
     private string title = "";
     private string body = "";
@@ -32,13 +33,22 @@
     private async Task SubmitAsync()
     {
         errorMessage = null;
+
+        AuthenticationState authState = await State;
+        int? userId = authState.User.GetUserId();
+        if (userId is null)
+        {
+            errorMessage = "You need to be logged in to create a post.";
+            return;
+        }
+
         try
         {
             CreatePostDto request = new()
             {
                 Title = title,
                 Body = body,
-                UserId = CurrentUserId
+                UserId = userId.Value
             };
             PostDto created = await PostService.CreatePostAsync(request);
             NavigationManager.NavigateTo($"/posts/{created.Id}");
