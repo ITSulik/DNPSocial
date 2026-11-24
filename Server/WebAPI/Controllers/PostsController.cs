@@ -1,6 +1,7 @@
 using ApiContracts;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebApi.Controllers;
@@ -25,7 +26,7 @@ public class PostsController(IPostRepository postRepository, IUserRepository use
             };
 
             Post created = await postRepository.CreatePostAsync(post);
-            PostDto dto = ToDto(created);
+            PostDto dto = await ToDtoAsync(created);
             return Created($"/posts/{dto.Id}", dto);
         }
         catch (InvalidOperationException e)
@@ -43,7 +44,7 @@ public class PostsController(IPostRepository postRepository, IUserRepository use
             existing.Title = request.Title;
             existing.Body = request.Body;
             await postRepository.UpdatePostAsync(existing);
-            return Ok(ToDto(existing));
+            return Ok(await ToDtoAsync(existing));
         }
         catch (InvalidOperationException e)
         {
@@ -57,7 +58,7 @@ public class PostsController(IPostRepository postRepository, IUserRepository use
         try
         {
             Post post = await postRepository.GetPostAsync(id);
-            return Ok(ToDto(post));
+            return Ok(await ToDtoAsync(post));
         }
         catch (InvalidOperationException e)
         {
@@ -66,13 +67,13 @@ public class PostsController(IPostRepository postRepository, IUserRepository use
     }
 
     [HttpGet]
-    public ActionResult<List<PostDto>> GetMany([FromQuery] string? title, [FromQuery] int? userId, [FromQuery] string? username)
+    public async Task<ActionResult<List<PostDto>>> GetMany([FromQuery] string? title, [FromQuery] int? userId, [FromQuery] string? username)
     {
         IQueryable<Post> posts = postRepository.GetPostsAsync();
 
         if (!string.IsNullOrWhiteSpace(title))
         {
-            posts = posts.Where(p => p.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+            posts = posts.Where(p => p.Title.ToLower().Contains(title.ToLower()));
         }
 
         if (userId.HasValue)
@@ -82,14 +83,23 @@ public class PostsController(IPostRepository postRepository, IUserRepository use
 
         if (!string.IsNullOrWhiteSpace(username))
         {
-            List<int> matchingUserIds = userRepository.GetUsersAsync()
-                .Where(u => u.Username.Contains(username, StringComparison.OrdinalIgnoreCase))
-                .Select(u => u.ID)
-                .ToList();
-            posts = posts.Where(p => matchingUserIds.Contains(p.UserId));
+            // Uses the User navigation property from 7.5; EF turns it into a JOIN on Users.
+            posts = posts.Where(p => p.User.Username.ToLower().Contains(username.ToLower()));
         }
 
-        return Ok(posts.Select(ToDto).ToList());
+        // Converting to PostDto inside the query lets EF fetch each post's author
+        // in the same SQL statement, instead of one extra query per post.
+        List<PostDto> dtos = await posts.Select(p => new PostDto
+        {
+            Id = p.Id,
+            Title = p.Title,
+            Body = p.Body,
+            UserId = p.UserId,
+            AuthorUsername = p.User.Username,
+            Created = p.Created
+        }).ToListAsync();
+
+        return Ok(dtos);
     }
 
     [HttpDelete("{id}")]
@@ -106,10 +116,10 @@ public class PostsController(IPostRepository postRepository, IUserRepository use
         }
     }
 
-    private PostDto ToDto(Post post)
+    private async Task<PostDto> ToDtoAsync(Post post)
     {
-        string? authorUsername = userRepository.GetUsersAsync()
-            .FirstOrDefault(u => u.ID == post.UserId)?.Username;
+        User? author = await userRepository.GetUsersAsync()
+            .FirstOrDefaultAsync(u => u.ID == post.UserId);
 
         return new PostDto
         {
@@ -117,7 +127,7 @@ public class PostsController(IPostRepository postRepository, IUserRepository use
             Title = post.Title,
             Body = post.Body,
             UserId = post.UserId,
-            AuthorUsername = authorUsername,
+            AuthorUsername = author?.Username,
             Created = post.Created
         };
     }

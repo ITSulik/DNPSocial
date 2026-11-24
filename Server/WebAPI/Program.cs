@@ -1,3 +1,4 @@
+using EfcRepositories;
 using FileStorage;
 using RepositoryContracts;
 
@@ -10,11 +11,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 //builder.Services.AddOpenApi();
+//
+// builder.Services.AddScoped<IPostRepository, PostFileStorage>();
+// builder.Services.AddScoped<ICommentRepository, CommentFileStorage>();
+// builder.Services.AddScoped<IUserRepository, UserFileStorage>();
 
-builder.Services.AddScoped<IPostRepository, PostFileStorage>();
-builder.Services.AddScoped<ICommentRepository, CommentFileStorage>();
-builder.Services.AddScoped<IUserRepository, UserFileStorage>();
-
+builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddScoped<IPostRepository, EfcPostRepo>();
+builder.Services.AddScoped<ICommentRepository, EfcCommentRepo>();
+builder.Services.AddScoped<IUserRepository, EfcUserRepo>();
 
 
 

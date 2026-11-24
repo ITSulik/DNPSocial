@@ -1,6 +1,7 @@
 using ApiContracts;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebApi.Controllers;
@@ -10,10 +11,10 @@ namespace WebApi.Controllers;
 public class AuthController(IUserRepository userRepository) : ControllerBase
 {
     [HttpPost("login")]
-    public ActionResult<UserDto> Login([FromBody] LoginRequest request)
+    public async Task<ActionResult<UserDto>> Login([FromBody] LoginRequest request)
     {
-        User? user = userRepository.GetUsersAsync()
-            .FirstOrDefault(u => u.Username == request.Username);
+        User? user = await userRepository.GetUsersAsync()
+            .FirstOrDefaultAsync(u => u.Username == request.Username);
 
         if (user is null || user.Password != request.Password)
         {

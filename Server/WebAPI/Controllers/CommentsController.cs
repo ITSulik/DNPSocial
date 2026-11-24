@@ -1,6 +1,7 @@
 using ApiContracts;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebApi.Controllers;
@@ -29,7 +30,7 @@ public class CommentsController(
             };
 
             Comment created = await commentRepository.CreateCommentAsync(comment);
-            CommentDto dto = ToDto(created);
+            CommentDto dto = await ToDtoAsync(created);
             return Created($"/comments/{dto.Id}", dto);
         }
         catch (InvalidOperationException e)
@@ -46,7 +47,7 @@ public class CommentsController(
             Comment existing = await commentRepository.GetCommentAsync(id);
             existing.Body = request.Body;
             await commentRepository.UpdateCommentAsync(existing);
-            return Ok(ToDto(existing));
+            return Ok(await ToDtoAsync(existing));
         }
         catch (InvalidOperationException e)
         {
@@ -60,7 +61,7 @@ public class CommentsController(
         try
         {
             Comment comment = await commentRepository.GetCommentAsync(id);
-            return Ok(ToDto(comment));
+            return Ok(await ToDtoAsync(comment));
         }
         catch (InvalidOperationException e)
         {
@@ -69,7 +70,7 @@ public class CommentsController(
     }
 
     [HttpGet]
-    public ActionResult<List<CommentDto>> GetMany([FromQuery] int? postId, [FromQuery] int? userId, [FromQuery] string? username)
+    public async Task<ActionResult<List<CommentDto>>> GetMany([FromQuery] int? postId, [FromQuery] int? userId, [FromQuery] string? username)
     {
         IQueryable<Comment> comments = commentRepository.GetCommentsAsync();
 
@@ -85,14 +86,23 @@ public class CommentsController(
 
         if (!string.IsNullOrWhiteSpace(username))
         {
-            List<int> matchingUserIds = userRepository.GetUsersAsync()
-                .Where(u => u.Username.Contains(username, StringComparison.OrdinalIgnoreCase))
-                .Select(u => u.ID)
-                .ToList();
-            comments = comments.Where(c => matchingUserIds.Contains(c.UserId));
+            // Uses the User navigation property from 7.5; EF turns it into a JOIN on Users.
+            comments = comments.Where(c => c.User.Username.ToLower().Contains(username.ToLower()));
         }
 
-        return Ok(comments.Select(ToDto).ToList());
+        // Converting to CommentDto inside the query lets EF fetch each comment's author
+        // in the same SQL statement, instead of one extra query per comment.
+        List<CommentDto> dtos = await comments.Select(c => new CommentDto
+        {
+            Id = c.Id,
+            Body = c.Body,
+            UserId = c.UserId,
+            PostId = c.PostId,
+            AuthorUsername = c.User.Username,
+            Created = c.Created
+        }).ToListAsync();
+
+        return Ok(dtos);
     }
 
     [HttpDelete("{id}")]
@@ -109,10 +119,10 @@ public class CommentsController(
         }
     }
 
-    private CommentDto ToDto(Comment comment)
+    private async Task<CommentDto> ToDtoAsync(Comment comment)
     {
-        string? authorUsername = userRepository.GetUsersAsync()
-            .FirstOrDefault(u => u.ID == comment.UserId)?.Username;
+        User? author = await userRepository.GetUsersAsync()
+            .FirstOrDefaultAsync(u => u.ID == comment.UserId);
 
         return new CommentDto
         {
@@ -120,7 +130,7 @@ public class CommentsController(
             Body = comment.Body,
             UserId = comment.UserId,
             PostId = comment.PostId,
-            AuthorUsername = authorUsername,
+            AuthorUsername = author?.Username,
             Created = comment.Created
         };
     }

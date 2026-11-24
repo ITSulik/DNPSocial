@@ -1,6 +1,7 @@
 using ApiContracts;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebApi.Controllers;
@@ -14,7 +15,7 @@ public class UsersController(IUserRepository userRepository) : ControllerBase
     {
         try
         {
-            bool usernameTaken = userRepository.GetUsersAsync().Any(u => u.Username == request.Username);
+            bool usernameTaken = await userRepository.GetUsersAsync().AnyAsync(u => u.Username == request.Username);
             if (usernameTaken)
             {
                 return BadRequest($"Username '{request.Username}' is already taken.");
@@ -71,16 +72,17 @@ public class UsersController(IUserRepository userRepository) : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<UserDto>> GetMany([FromQuery] string? username)
+    public async Task<ActionResult<List<UserDto>>> GetMany([FromQuery] string? username)
     {
         IQueryable<User> users = userRepository.GetUsersAsync();
 
         if (!string.IsNullOrWhiteSpace(username))
         {
-            users = users.Where(u => u.Username.Contains(username, StringComparison.OrdinalIgnoreCase));
+            users = users.Where(u => u.Username.ToLower().Contains(username.ToLower()));
         }
 
-        return Ok(users.Select(ToDto).ToList());
+        List<User> result = await users.ToListAsync();
+        return Ok(result.Select(ToDto).ToList());
     }
 
     [HttpDelete("{id}")]
